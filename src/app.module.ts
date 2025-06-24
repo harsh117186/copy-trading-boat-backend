@@ -5,6 +5,9 @@ import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
 import { DatabaseService } from './service/database.service';
 import { JwtModule } from '@nestjs/jwt';
+import { AccountDetailController } from './controller/account-detail.controller';
+import { AccountDetailService } from './service/account-detail.service';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -14,7 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: { expiresIn: '60m' },
     }),
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, DatabaseService],
+  controllers: [AppController, AuthController, AccountDetailController],
+  providers: [AppService, AuthService, DatabaseService, AccountDetailService, JwtStrategy],
 })
 export class AppModule {}
