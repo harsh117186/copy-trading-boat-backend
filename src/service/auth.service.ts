@@ -60,7 +60,7 @@ export class AuthService {
     }
   }
 
-  async signIn(signinDto: SigninDto): Promise<{ accessToken: string }> {
+  async signIn(signinDto: SigninDto): Promise<{ accessToken: string; userId: string }> {
     const { username, password } = signinDto;
     const users = this.databaseService.getCollection('users');
 
@@ -76,9 +76,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user._id, username: user.username };
+    // Ensure user._id is a string for JWT and response
+    const userId = user._id.toString();
+    const payload = { sub: userId, username: user.username };
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    return { accessToken, userId };
   }
 } 

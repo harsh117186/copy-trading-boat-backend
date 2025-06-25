@@ -16,13 +16,13 @@ export class AuthController {
   @Post('signin')
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() signinDto: SigninDto, @Res({ passthrough: true }) res: Response) {
-    const { accessToken } = await this.authService.signIn(signinDto);
+    const { accessToken, userId } = await this.authService.signIn(signinDto);
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 1000, // 1 hour
     });
-    return { message: 'Login successful' };
+    return { message: 'Login successful',userId};
   }
 } 
