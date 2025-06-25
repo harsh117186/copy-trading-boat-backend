@@ -14,7 +14,7 @@ export class AccountDetailService {
       encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
     }
     const collection = this.databaseService.getCollection('account_detail');
-    const result = await collection.insertOne({ ...dto, details: encryptedDetails, user_id: userId });
+    const result = await collection.insertOne({ ...dto, details: encryptedDetails, user_id: userId, accountType: dto.accountType });
     return { insertedId: result.insertedId };
   }
 

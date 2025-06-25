@@ -8,6 +8,9 @@ export class AccountDetailDto {
   @IsIn(['dhan', 'angel', 'kotak_neo'])
   broker: string;
 
+  @IsIn(['master', 'child'])
+  accountType: string;
+
   @ValidateNested()
   @Type((options) => {
     switch (options?.object?.broker) {
