@@ -16,4 +16,8 @@ export class AngelAccountDetailDto {
   @IsNotEmpty()
   @IsString()
   TOTP_SECRET: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nickname: string;
 } 

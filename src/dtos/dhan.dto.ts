@@ -8,4 +8,8 @@ export class DhanAccountDetailDto {
   @IsNotEmpty()
   @IsString()
   access_token: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nickname: string;
 } 

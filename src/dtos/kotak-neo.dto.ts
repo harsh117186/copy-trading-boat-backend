@@ -28,4 +28,8 @@ export class KotakNeoAccountDetailDto {
   @IsNotEmpty()
   @IsString()
   MOBILE_NUMBER: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nickname: string;
 } 
