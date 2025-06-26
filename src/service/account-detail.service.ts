@@ -9,23 +9,18 @@ export class AccountDetailService {
 
   async create(dto: AccountDetailDto, userId: string) {
     const collection = this.databaseService.getCollection('account_detail');
-
-    // Encrypt all string fields in details (for insert)
-    const encryptedDetails: Record<string, any> = {};
-    for (const [key, value] of Object.entries(dto.details)) {
-      encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
-    }
-
-    // Fetch all accounts for this user
     const userAccounts = await collection.find({ user_id: userId }).toArray();
 
-    // 1. Check for unique nickname per user (decrypt and compare)
+    // 1. Unique nickname check (should exit immediately if duplicate)
     for (const acc of userAccounts) {
       if (acc.details && acc.details.nickname) {
         try {
           const decryptedNickname = decrypt(acc.details.nickname);
-          if (decryptedNickname === dto.details.nickname) {
+          const dbNick = decryptedNickname.trim().toLowerCase();
+          const userNick = dto.details.nickname.trim().toLowerCase();
+          if (dbNick === userNick) {
             throw new ConflictException('Nickname must be unique per user.');
+            return; // For debugging: see if this line is ever reached
           }
         } catch (e) { /* ignore decryption errors */ }
       }
@@ -65,6 +60,12 @@ export class AccountDetailService {
       if (existingMaster) {
         throw new ConflictException('Only one master account is allowed per user. If You Want to chnage Master Account then First Change it to child');
       }
+    }
+
+    // Encrypt all string fields in details (for insert)
+    const encryptedDetails: Record<string, any> = {};
+    for (const [key, value] of Object.entries(dto.details)) {
+      encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
     }
 
     // Insert with encrypted details
