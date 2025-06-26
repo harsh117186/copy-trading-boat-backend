@@ -10,20 +10,30 @@ export class AccountDetailService {
   async create(dto: AccountDetailDto, userId: string) {
     const collection = this.databaseService.getCollection('account_detail');
 
-    // 1. Check for unique nickname per user
+    // Encrypt all string fields in details (for both checks and insert)
+    const encryptedDetails: Record<string, any> = {};
+    for (const [key, value] of Object.entries(dto.details)) {
+      encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
+    }
+
+    // 1. Check for unique nickname per user (using encrypted nickname)
     const existingNickname = await collection.findOne({
       user_id: userId,
-      'details.nickname': dto.details.nickname,
+      'details.nickname': encryptedDetails.nickname,
     });
     if (existingNickname) {
       throw new ConflictException('Nickname must be unique per user.');
     }
 
     // 2. Check for repeated account details (all details fields match for this user and broker)
+    const detailsQuery: Record<string, any> = {};
+    for (const [key, value] of Object.entries(encryptedDetails)) {
+      detailsQuery[`details.${key}`] = value;
+    }
     const existingDetails = await collection.findOne({
       user_id: userId,
       broker: dto.broker,
-      details: dto.details,
+      ...detailsQuery,
     });
     if (existingDetails) {
       throw new ConflictException('Account details are already added for this user.');
@@ -41,11 +51,7 @@ export class AccountDetailService {
       }
     }
 
-    // Encrypt all string fields in details
-    const encryptedDetails: Record<string, any> = {};
-    for (const [key, value] of Object.entries(dto.details)) {
-      encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
-    }
+    // Insert with encrypted details
     const result = await collection.insertOne({ ...dto, details: encryptedDetails, user_id: userId, accountType: dto.accountType });
     return { insertedId: result.insertedId };
   }
