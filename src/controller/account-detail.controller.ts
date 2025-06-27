@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request, Get } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, Get, Patch, Param, Delete } from '@nestjs/common';
 import { AccountDetailDto } from '../dtos/account-detail.dto';
 import { AccountDetailService } from '../service/account-detail.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,5 +19,24 @@ export class AccountDetailController {
   async findAllForUser(@Request() req) {
     const userId = req.user.userId; // Extract userId from JWT payload
     return this.accountDetailService.findAllByUserId(userId);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: AccountDetailDto,
+    @Request() req
+  ) {
+    const userId = req.user.userId;
+    return this.accountDetailService.update(dto, userId, id);
+  }
+
+  @Delete(':id')
+  async delete(
+    @Param('id') id: string,
+    @Request() req
+  ) {
+    const userId = req.user.userId;
+    return this.accountDetailService.delete(userId, id);
   }
 } 

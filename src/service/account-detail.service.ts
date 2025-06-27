@@ -3,6 +3,7 @@ import { DatabaseService } from './database.service';
 import { AccountDetailDto } from '../dtos/account-detail.dto';
 import { encrypt, decrypt } from '../utils/crypto.util';
 import { BadRequestException } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class AccountDetailService {
@@ -80,5 +81,45 @@ export class AccountDetailService {
   async findAllByUserId(userId: string) {
     const collection = this.databaseService.getCollection('account_detail');
     return collection.find({ user_id: userId }).toArray();
+  }
+
+  async update(dto: AccountDetailDto, userId: string, objectId: string) {
+    const collection = this.databaseService.getCollection('account_detail');
+
+    // Prevent multiple master accounts per user
+    if (dto.accountType === 'master') {
+      const existingMaster = await collection.findOne({
+        user_id: userId,
+        accountType: 'master',
+        _id: { $ne: new ObjectId(objectId) }, // Exclude the current account being edited
+      });
+      if (existingMaster) {
+        throw new ConflictException('Only one master account is allowed per user. If you want to change another account to master, first change the existing master to child.');
+      }
+    }
+
+    // Encrypt all string fields in details (for update)
+    const encryptedDetails: Record<string, any> = {};
+    for (const [key, value] of Object.entries(dto.details)) {
+      encryptedDetails[key] = typeof value === 'string' ? encrypt(value) : value;
+    }
+    // Update the document by _id and user_id
+    const result = await collection.updateOne(
+      { _id: new ObjectId(objectId), user_id: userId },
+      { $set: { ...dto, details: encryptedDetails } }
+    );
+    if (result.matchedCount === 0) {
+      throw new BadRequestException('Account detail not found or not owned by user.');
+    }
+    return { modifiedCount: result.modifiedCount };
+  }
+
+  async delete(userId: string, objectId: string) {
+    const collection = this.databaseService.getCollection('account_detail');
+    const result = await collection.deleteOne({ _id: new ObjectId(objectId), user_id: userId });
+    if (result.deletedCount === 0) {
+      throw new BadRequestException('Account detail not found or not owned by user.');
+    }
+    return { deletedCount: result.deletedCount };
   }
 } 
