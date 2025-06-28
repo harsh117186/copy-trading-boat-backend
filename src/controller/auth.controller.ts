@@ -44,7 +44,7 @@ export class AuthController {
     return this.authService.updateProfile(userId, updateProfileDto);
   }
 
-  @Post('email-otp-sender')
+  @Get('email-otp-sender')
   @UseGuards(JwtAuthGuard)
   async forgotPassword(@Request() req) {
     const userId = req.user.userId;
