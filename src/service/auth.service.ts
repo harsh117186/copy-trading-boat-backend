@@ -1,9 +1,10 @@
-import { Injectable, ConflictException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { SignupDto } from '../dtos/signup.dto';
 import { DatabaseService } from './database.service';
 import { JwtService } from '@nestjs/jwt';
 import { SigninDto } from 'src/dtos/signin.dto';
+import { ProfileDto } from '../dtos/profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -82,5 +83,25 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken, userId };
+  }
+
+  async getProfile(userId: string): Promise<ProfileDto> {
+    const users = this.databaseService.getCollection('users');
+    
+    // Convert string userId to ObjectId for MongoDB query
+    const { ObjectId } = require('mongodb');
+    const user = await users.findOne({ _id: new ObjectId(userId) });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Return user data without password
+    return {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      username: user.username,
+    };
   }
 } 

@@ -25,6 +25,63 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## API Endpoints
+
+### Authentication Endpoints
+
+#### POST /auth/signup
+Register a new user account.
+
+**Request Body:**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "username": "johndoe",
+  "password": "password123"
+}
+```
+
+#### POST /auth/signin
+Login to get access token.
+
+**Request Body:**
+```json
+{
+  "username": "johndoe",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Login successful",
+  "userId": "user_id_here"
+}
+```
+
+#### GET /auth/profile
+Get current user's profile information. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "_id": "user_id_here",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "username": "johndoe",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
 ## Project setup
 
 ```bash
