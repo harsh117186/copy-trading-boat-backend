@@ -82,6 +82,90 @@ Authorization: Bearer <access_token>
 }
 ```
 
+#### PATCH /auth/profile
+Update current user's profile information. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body (all fields are optional):**
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@example.com",
+  "username": "janesmith"
+}
+```
+
+**Response:**
+```json
+{
+  "_id": "user_id_here",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@example.com",
+  "username": "janesmith",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### POST /auth/forgot-password
+Request a password reset OTP to be sent to your Gmail address. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{}
+```
+
+**Response:**
+```json
+{
+  "message": "OTP has been sent to your email address.",
+  "email": "user@gmail.com"
+}
+```
+
+#### POST /auth/reset-password
+Reset password using the OTP received via Gmail. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+  "otp": "123456",
+  "newPassword": "newpassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password has been reset successfully"
+}
+```
+
+## Email Configuration
+
+This application uses Gmail for sending OTP emails. See [EMAIL_SETUP.md](./EMAIL_SETUP.md) for detailed setup instructions.
+
+**Required Environment Variables:**
+```env
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-16-character-app-password
+```
+
 ## Project setup
 
 ```bash

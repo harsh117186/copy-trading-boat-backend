@@ -8,6 +8,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AccountDetailController } from './controller/account-detail.controller';
 import { AccountDetailService } from './service/account-detail.service';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { EmailService } from './service/email.service';
+import { OtpService } from './service/otp.service';
 
 @Module({
   imports: [
@@ -18,6 +20,6 @@ import { JwtStrategy } from './auth/jwt.strategy';
     }),
   ],
   controllers: [AppController, AuthController, AccountDetailController],
-  providers: [AppService, AuthService, DatabaseService, AccountDetailService, JwtStrategy],
+  providers: [AppService, AuthService, DatabaseService, AccountDetailService, JwtStrategy, EmailService, OtpService],
 })
 export class AppModule {}
