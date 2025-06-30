@@ -75,6 +75,22 @@ export class AccountDetailService {
 
     // Insert with encrypted details
     const result = await collection.insertOne({ ...dto, details: encryptedDetails, user_id: userId, accountType: dto.accountType });
+
+    // Add entry to copy-trade-details collection
+    const copyTradeCollection = this.databaseService.getCollection('copy-trade-details');
+    await copyTradeCollection.insertOne({
+      user_id: userId,
+      account_id: result.insertedId,
+      connected: false,
+      markets: {
+        NSE: false,
+        BSE: false,
+        NFO: false,
+        MCX: false,
+      },
+      multiplier: 1.0,
+    });
+
     return { insertedId: result.insertedId };
   }
 
