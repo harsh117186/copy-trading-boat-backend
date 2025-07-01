@@ -16,7 +16,7 @@ import * as cookie from 'cookie';
 @WebSocketGateway({
   namespace: '/copy-trade-details',
   cors: {
-    origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // add all allowed origins
+    origin: ['http://localhost:5173', 'https://copytradingbot-825130f9bd91.herokuapp.com'], // add all allowed origins
     credentials: true,
   },
 })
