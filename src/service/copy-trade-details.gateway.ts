@@ -34,9 +34,12 @@ export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDi
         client.disconnect();
         return;
       }
+      // Only extract userId from JWT and set it directly
       const payload = jwt.verify(token, secret) as jwt.JwtPayload;
-      // Attach userId to socket for later use
-      (client as any).userId = typeof payload.sub === 'string' ? payload.sub : undefined;
+      const userId = typeof payload.sub === 'string' ? payload.sub : undefined;
+      (client as any).userId = userId;
+      // Optionally, emit the userId to the client after connection
+      // client.emit('userId', userId);
     } catch (err) {
       client.emit('error', 'Invalid or expired authentication token');
       client.disconnect();
