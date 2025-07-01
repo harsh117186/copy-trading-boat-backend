@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProfileDto } from '../dtos/profile.dto';
 import { UpdateProfileDto } from '../dtos/update-profile.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
+import { encrypt } from '../utils/crypto.util';
 
 @Controller('auth')
 export class AuthController {
@@ -56,5 +57,11 @@ export class AuthController {
   async resetPassword(@Request() req, @Body() resetPasswordDto: ResetPasswordDto) {
     const userId = req.user.userId;
     return this.authService.resetPassword(userId, resetPasswordDto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Request() req) {
+    return { userId: encrypt(req.user.userId.toString()) };
   }
 } 
