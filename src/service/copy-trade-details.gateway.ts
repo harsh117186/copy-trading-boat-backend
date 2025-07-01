@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import * as jwt from 'jsonwebtoken';
+import * as cookie from 'cookie';
 
 @WebSocketGateway({ namespace: '/copy-trade-details', cors: true })
 @Injectable()
@@ -22,7 +23,12 @@ export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDi
   async handleConnection(client: Socket) {
     try {
       // Try to get token from handshake auth or headers
-      const token = client.handshake.auth?.token || client.handshake.headers['authorization']?.split(' ')[1];
+      let token = client.handshake.auth?.token || client.handshake.headers['authorization']?.split(' ')[1];
+      // If not found, try to get from cookies
+      if (!token && client.handshake.headers.cookie) {
+        const cookies = cookie.parse(client.handshake.headers.cookie);
+        token = cookies['access_token'];
+      }
       if (!token) {
         client.emit('error', 'Missing authentication token');
         client.disconnect();
