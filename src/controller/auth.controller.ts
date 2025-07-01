@@ -22,11 +22,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() signinDto: SigninDto, @Res({ passthrough: true }) res: Response) {
     const { accessToken, userId } = await this.authService.signIn(signinDto);
+    // res.cookie('access_token', accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'lax',
+    //   maxAge: 60 * 60 * 1000, // 1 hour
+    // });
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,           // Always true for cross-site cookies
+      sameSite: 'none',       // Required for cross-site cookies
       maxAge: 60 * 60 * 1000, // 1 hour
+      // domain: '.herokuapp.com', // Optional, only if you want to share across subdomains
     });
     return { message: 'Login successful',userId};
   }
