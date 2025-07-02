@@ -7,10 +7,9 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import * as jwt from 'jsonwebtoken';
-import * as cookie from 'cookie';
+import { encrypt } from '../utils/crypto.util';
 
 
 @WebSocketGateway({
@@ -21,7 +20,7 @@ import * as cookie from 'cookie';
   },
 })
 @Injectable()
-export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnApplicationBootstrap {
   @WebSocketServer()
   server: Server;
 
@@ -56,6 +55,34 @@ export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDi
     }
     const collection = this.databaseService.getCollection('copy-trade-details');
     const userDetails = await collection.find({ user_id: userId }).toArray();
-    client.emit('copyTradeDetails', userDetails);
+    // Encrypt the userDetails before sending
+    const encryptedDetails = encrypt(JSON.stringify(userDetails));
+    client.emit('copyTradeDetails', encryptedDetails);
+  }
+
+  async onApplicationBootstrap() {
+    // Now the database is guaranteed to be initialized
+    const collection = this.databaseService.getCollection('copy-trade-details');
+    const changeStream = collection.watch();
+    changeStream.on('change', (change) => {
+      let userId = undefined;
+      if ('fullDocument' in change && change.fullDocument && change.fullDocument.user_id) {
+        userId = change.fullDocument.user_id;
+      } else if ('documentKey' in change && change.documentKey && change.documentKey.user_id) {
+        userId = change.documentKey.user_id;
+      }
+      // Encrypt the change object before sending
+      const encryptedChange = encrypt(JSON.stringify(change));
+      if (userId) {
+        for (const [id, socket] of this.server.sockets.sockets) {
+          if ((socket as any).userId === userId) {
+            socket.emit('copyTradeDetailsUpdated', encryptedChange);
+          }
+        }
+      } else {
+        // Fallback: broadcast to all if user_id is not found
+        this.server.emit('copyTradeDetailsUpdated', encryptedChange);
+      }
+    });
   }
 } 
