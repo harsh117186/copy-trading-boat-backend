@@ -22,12 +22,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() signinDto: SigninDto, @Res({ passthrough: true }) res: Response) {
     const { accessToken, userId } = await this.authService.signIn(signinDto);
-    // res.cookie('access_token', accessToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'lax',
-    //   maxAge: 60 * 60 * 1000, // 1 hour
-    // });
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
     // res.cookie('access_token', accessToken, {
     //   httpOnly: true,
     //   secure: true,           // Always true for cross-site cookies
@@ -35,12 +35,12 @@ export class AuthController {
     //   maxAge: 60 * 60 * 1000, // 1 hour
     //   // domain: '.herokuapp.com', // Optional, only if you want to share across subdomains
     // });
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: '.herokuapp.com', // optional, for subdomain sharing
-    });
+    // res.cookie('access_token', accessToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: 'none',
+    //   // domain: '.herokuapp.com', // optional, for subdomain sharing
+    // });
     return { message: 'Login successful',userId};
   }
 

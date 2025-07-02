@@ -29,32 +29,16 @@ export class CopyTradeDetailsGateway implements OnGatewayConnection, OnGatewayDi
 
   async handleConnection(client: Socket) {
     try {
-      // Try to get token from handshake auth or headers
-      let token = client.handshake.auth?.token || client.handshake.headers['authorization']?.split(' ')[1];
-      // If not found, try to get from cookies
-      if (!token && client.handshake.headers.cookie) {
-        const cookies = cookie.parse(client.handshake.headers.cookie);
-        token = cookies['access_token'];
-      }
-      if (!token) {
-        client.emit('error', 'Missing authentication token');
+      // Get userId from handshake auth
+      const userId = client.handshake.auth?.userId;
+      if (!userId) {
+        client.emit('error', 'Missing userId');
         client.disconnect();
         return;
       }
-      const secret = process.env.JWT_SECRET;
-      if (!secret) {
-        client.emit('error', 'Server misconfiguration: JWT_SECRET not set');
-        client.disconnect();
-        return;
-      }
-      // Only extract userId from JWT and set it directly
-      const payload = jwt.verify(token, secret) as jwt.JwtPayload;
-      const userId = typeof payload.sub === 'string' ? payload.sub : undefined;
       (client as any).userId = userId;
-      // Optionally, emit the userId to the client after connection
-      // client.emit('userId', userId);
     } catch (err) {
-      client.emit('error', 'Invalid or expired authentication token');
+      client.emit('error', 'Connection error');
       client.disconnect();
     }
   }
