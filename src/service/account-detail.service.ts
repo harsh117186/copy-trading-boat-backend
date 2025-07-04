@@ -80,7 +80,7 @@ export class AccountDetailService {
     const copyTradeCollection = this.databaseService.getCollection('copy-trade-details');
     await copyTradeCollection.insertOne({
       user_id: userId,
-      account_id: result.insertedId,
+      account_id: result.insertedId.toString(), // Ensure account_id is stored as a string
       connected: false,
       markets: {
         NSE: false,
@@ -137,5 +137,14 @@ export class AccountDetailService {
       throw new BadRequestException('Account detail not found or not owned by user.');
     }
     return { deletedCount: result.deletedCount };
+  }
+
+  async listAllMasterUserIds(): Promise<string[]> {
+    const collection = this.databaseService.getCollection('account_detail');
+    // Find all documents where accountType is 'master', project only user_id
+    const masters = await collection.find({ accountType: 'master' }).project({ user_id: 1 }).toArray();
+    // Extract unique user_ids
+    const userIds = Array.from(new Set(masters.map((doc: any) => doc.user_id)));
+    return userIds;
   }
 } 

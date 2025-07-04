@@ -11,6 +11,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { EmailService } from './service/email.service';
 import { OtpService } from './service/otp.service';
 import { CopyTradeDetailsGateway } from './service/copy-trade-details.gateway';
+import { CopyTradeDetailsController } from './controller/copy-trade-details.controller';
+import { CopyTradeDetailsService } from './service/copy-trade-details.service';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { CopyTradeDetailsGateway } from './service/copy-trade-details.gateway';
       signOptions: { expiresIn: '60m' },
     }),
   ],
-  controllers: [AppController, AuthController, AccountDetailController],
-  providers: [AppService, AuthService, DatabaseService, AccountDetailService, JwtStrategy, EmailService, OtpService, CopyTradeDetailsGateway],
+  controllers: [AppController, AuthController, AccountDetailController, CopyTradeDetailsController],
+  providers: [AppService, AuthService, DatabaseService, AccountDetailService, JwtStrategy, EmailService, OtpService, CopyTradeDetailsGateway, CopyTradeDetailsService],
 })
 export class AppModule {}
